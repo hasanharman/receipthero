@@ -7,6 +7,7 @@ import { UploadedFile } from "@/lib/types";
 
 import Header from "./Header";
 import { Tooltip } from "@/ui/tooltip";
+import CurrencySelector from "./CurrencySelector";
 
 interface UploadReceiptPageProps {
   onProcessFiles: (uploadedFiles: UploadedFile[]) => Promise<void>;
@@ -199,6 +200,11 @@ export default function UploadReceiptPage({
           <p className="text-base text-[#4a5565] max-w-full md:max-w-[271px] mx-auto">
             Instantly convert PDF receipts into clear, categorized summaries.
           </p>
+          
+          {/* Currency Selector */}
+          <div className="max-w-[200px] mx-auto">
+            <CurrencySelector />
+          </div>
         </div>
 
         <div

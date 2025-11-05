@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Kumbh_Sans } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/ui/toast";
+import { CurrencyProvider } from "@/lib/currency-context";
 import PlausibleProvider from "next-plausible";
 
 const kumbhSans = Kumbh_Sans({
@@ -29,7 +30,9 @@ export default function RootLayout({
       <PlausibleProvider domain="usereceipthero.com" />
       </head>
       <body className={`${kumbhSans.variable} antialiased`}>
-        <ToastProvider>{children}</ToastProvider>
+        <CurrencyProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </CurrencyProvider>
       </body>
     </html>
   );

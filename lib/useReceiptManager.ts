@@ -186,7 +186,7 @@ export function useReceiptManager() {
     []
   );
 
-  // Calculate spending breakdown
+  // Calculate spending breakdown (using original amounts)
   const calculateBreakdown = useCallback(
     (receipts: ProcessedReceipt[]): SpendingBreakdown => {
       const categoryTotals = receipts.reduce((acc, receipt) => {
@@ -333,65 +333,13 @@ export function useReceiptManager() {
       const results = await Promise.all(filePromises);
       console.log("📊 All files processed, results:", results);
 
-      // Now batch convert currencies for all successful receipts
-      const receiptsToConvert = results
-        .filter((r) => r.status === "receipt" && r.receipt)
-        .map((r) => r.receipt!)
-        .filter((receipt) => receipt.currency !== "USD");
-
-      if (receiptsToConvert.length > 0) {
-        try {
-          console.log(
-            "💱 Converting currencies for",
-            receiptsToConvert.length,
-            "receipt(s)"
-          );
-
-          // Get unique currencies
-          const currencies = [
-            ...new Set(receiptsToConvert.map((r) => r.currency)),
-          ];
-          const conversionRates = await getMultipleUSDConversionRates(
-            currencies
-          );
-
-          // Apply conversions
-          for (const result of results) {
-            if (result.status === "receipt" && result.receipt) {
-              const receipt = result.receipt;
-              const currency = receipt.currency;
-
-              if (currency !== "USD" && conversionRates[currency]) {
-                const conversionRate = conversionRates[currency];
-                const originalAmount =
-                  result.rawReceipt?.amount || receipt.amount;
-                const originalTaxAmount =
-                  result.rawReceipt?.taxAmount || receipt.taxAmount;
-
-                receipt.amount = originalAmount / conversionRate;
-                receipt.taxAmount = originalTaxAmount / conversionRate;
-                receipt.originalAmount = originalAmount;
-                receipt.originalTaxAmount = originalTaxAmount;
-                receipt.exchangeRate = conversionRate;
-
-                console.log(
-                  `✅ Converted ${originalAmount} ${currency} to ${receipt.amount.toFixed(
-                    2
-                  )} USD (rate: ${conversionRate})`
-                );
-              }
-            }
-          }
-        } catch (error) {
-          console.error("❌ Failed to convert currencies:", error);
-          // Keep original amounts if conversion fails
-        }
-      }
+      // Keep receipts in their original currency - no conversion needed here
+      // Currency conversion will be handled at display time in the components
 
       // Clean up rawReceipt data
       for (const result of results) {
-        if (result.rawReceipt) {
-          delete result.rawReceipt;
+        if ((result as any).rawReceipt) {
+          delete (result as any).rawReceipt;
         }
       }
 
@@ -410,8 +358,8 @@ export function useReceiptManager() {
       try {
         // Filter only files that are receipts
         const receiptFiles = uploadedFiles
-          .filter((file) => file.status === "receipt" && file.receipt)
-          .map((file) => file.receipt!);
+          .filter((file) => file.status === "receipt" && (file as any).receipt)
+          .map((file) => (file as any).receipt!);
 
         console.log("📋 Receipt files to add:", receiptFiles.length);
 

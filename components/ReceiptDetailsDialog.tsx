@@ -5,6 +5,8 @@ import { Button } from "@/ui/button";
 import { Trash2, X } from "lucide-react";
 import type { ProcessedReceipt } from "@/lib/types";
 import { formatDisplayDate, toTitleCase } from "@/lib/utils";
+import { useCurrency } from "@/lib/currency-context";
+import { formatCurrency, convertReceiptAmount, convertReceiptTaxAmount } from "@/lib/currency-utils";
 
 interface ReceiptDetailsDialogProps {
   receipt: ProcessedReceipt | null;
@@ -19,6 +21,8 @@ export default function ReceiptDetailsDialog({
   onClose,
   onDelete,
 }: ReceiptDetailsDialogProps) {
+  const { selectedCurrency } = useCurrency();
+  
   if (!receipt) return null;
 
   return (
@@ -56,7 +60,7 @@ export default function ReceiptDetailsDialog({
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-[#6a7282]">Amount</span>
                     <span className="text-base font-medium text-[#1e2939]">
-                      ${receipt.amount.toFixed(2)} USD
+                      {formatCurrency(receipt.amount, receipt.currency as any)} {receipt.currency}
                     </span>
                   </div>
                   {receipt.originalAmount && receipt.currency && receipt.currency !== 'USD' && (
@@ -100,7 +104,7 @@ export default function ReceiptDetailsDialog({
                  <div className="flex justify-between items-center">
                    <span className="text-sm text-[#6a7282]">Tax Amount</span>
                    <span className="text-base font-medium text-[#1e2939]">
-                     ${receipt.taxAmount.toFixed(2)} USD
+                     {formatCurrency(receipt.taxAmount, receipt.currency as any)} {receipt.currency}
                    </span>
                  </div>
                  {receipt.originalTaxAmount && receipt.currency && receipt.currency !== 'USD' && (

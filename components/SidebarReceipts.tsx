@@ -1,6 +1,9 @@
 "use client";
 
 import type { ProcessedReceipt, SpendingBreakdown } from "@/lib/types";
+import CurrencySelector from "./CurrencySelector";
+import { useCurrency } from "@/lib/currency-context";
+import { formatCurrency, convertReceiptAmount } from "@/lib/currency-utils";
 
 interface SidebarReceiptsProps {
   processedReceipts: ProcessedReceipt[];
@@ -9,7 +12,9 @@ interface SidebarReceiptsProps {
   isProcessing: boolean;
 }
 
-function calculateTotals(receipts: ProcessedReceipt[]) {
+function calculateTotals(receipts: ProcessedReceipt[], currency: string) {
+  // For now, just sum all amounts regardless of currency
+  // In a full implementation, you'd convert to the selected currency
   const totalSpending = receipts.reduce(
     (sum, receipt) => sum + receipt.amount,
     0
@@ -24,7 +29,8 @@ export default function SidebarReceipts({
   onAddMoreReceipts,
   isProcessing,
 }: SidebarReceiptsProps) {
-  const { totalSpending, totalReceipts } = calculateTotals(processedReceipts);
+  const { selectedCurrency } = useCurrency();
+  const { totalSpending, totalReceipts } = calculateTotals(processedReceipts, selectedCurrency);
 
   return (
     <div className="w-[calc(100% - 16px)] md:max-w-[322px] rounded-2xl bg-white border border-[#d1d5dc] m-4 md:mr-0 h-fit">
@@ -46,11 +52,16 @@ export default function SidebarReceipts({
         <div className="px-8 py-6">
           <p className="text-sm text-[#1d293d] mb-2">Total Spending</p>
           <p className="text-4xl font-semibold text-[#020618] mb-4">
-            ${totalSpending.toFixed(2)}
+            {formatCurrency(totalSpending, selectedCurrency)}
           </p>
           <p className="text-sm text-[#4a5565]">
             {totalReceipts} receipts processed
           </p>
+          
+          {/* Currency Selector */}
+          <div className="mt-4">
+            <CurrencySelector />
+          </div>
         </div>
         {/* Spending Breakdown */}
         <div className="bg-white border border-gray-200 px-8 py-5 mb-6">
@@ -61,7 +72,7 @@ export default function SidebarReceipts({
                   <span className="text-sm font-medium capitalize">
                     {category.name}
                   </span>
-                  <span className="text-sm">${category.amount.toFixed(2)}</span>
+                  <span className="text-sm">{formatCurrency(category.amount, selectedCurrency)}</span>
                 </div>
                 <div className="flex justify-between items-center mb-2">
                   <div className="w-full bg-gray-100 rounded-full h-2 mr-2">

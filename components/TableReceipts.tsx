@@ -6,6 +6,8 @@ import { Trash2 } from "lucide-react";
 import type { ProcessedReceipt } from "@/lib/types";
 import { formatDisplayDate, toTitleCase } from "@/lib/utils";
 import ReceiptDetailsDialog from "./ReceiptDetailsDialog";
+import { useCurrency } from "@/lib/currency-context";
+import { formatCurrency, convertReceiptAmount, convertReceiptTaxAmount } from "@/lib/currency-utils";
 
 interface TableReceiptsProps {
   processedReceipts: ProcessedReceipt[];
@@ -13,7 +15,8 @@ interface TableReceiptsProps {
   onStartOver: () => void;
 }
 
-function calculateTotals(receipts: ProcessedReceipt[]) {
+function calculateTotals(receipts: ProcessedReceipt[], currency: string) {
+  // For now, just sum all amounts regardless of currency
   const totalSpending = receipts.reduce(
     (sum, receipt) => sum + receipt.amount,
     0
@@ -30,8 +33,9 @@ export default function TableReceipts({
     useState<ProcessedReceipt | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc"); // Default to newest first
+  const { selectedCurrency } = useCurrency();
 
-  const totalSpending = calculateTotals(processedReceipts);
+  const totalSpending = calculateTotals(processedReceipts, selectedCurrency);
 
   // Sort receipts by date
   const sortedReceipts = [...processedReceipts].sort((a, b) => {
@@ -141,9 +145,9 @@ export default function TableReceipts({
                   <td className="p-4">{receipt.vendor}</td>
                   <td className="p-4">{toTitleCase(receipt.category)}</td>
                   <td className="p-4">{toTitleCase(receipt.paymentMethod)}</td>
-                  <td className="p-4">${receipt.taxAmount.toFixed(2)}</td>
+                  <td className="p-4">{formatCurrency(receipt.taxAmount, receipt.currency as any)}</td>
                   <td className="p-4 font-semibold">
-                    ${receipt.amount.toFixed(2)}
+                    {formatCurrency(receipt.amount, receipt.currency as any)}
                   </td>
                   <td className="p-4">
                     <div className="flex items-center gap-2">
@@ -168,7 +172,7 @@ export default function TableReceipts({
                 <td colSpan={7} className="p-4 font-semibold">
                   Total:
                 </td>
-                <td className="p-4 font-bold">${totalSpending.toFixed(2)}</td>
+                <td className="p-4 font-bold">{formatCurrency(totalSpending, selectedCurrency)}</td>
               </tr>
             </tfoot>
           </table>
