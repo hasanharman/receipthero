@@ -6,7 +6,6 @@ import { useDropzone } from "react-dropzone";
 import { UploadedFile } from "@/lib/types";
 
 import Header from "./Header";
-import Footer from "./Footer";
 import { Tooltip } from "@/ui/tooltip";
 
 interface UploadReceiptPageProps {
@@ -414,8 +413,6 @@ export default function UploadReceiptPage({
           )}
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

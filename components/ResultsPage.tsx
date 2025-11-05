@@ -2,7 +2,6 @@
 
 import SidebarReceipts from "./SidebarReceipts";
 import TableReceipts from "./TableReceipts";
-import Footer from "./Footer";
 import type { ProcessedReceipt, SpendingBreakdown } from "@/lib/types";
 
 interface ResultsPageProps {
@@ -37,8 +36,6 @@ export default function ResultsPage({
           onStartOver={onStartOver}
         />
       </div>
-
-      <Footer />
     </div>
   );
 }
